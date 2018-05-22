@@ -48,7 +48,7 @@ public class LaunchCucumberIntegrationTest {
 		wireMockServer = new WireMockServer();
 		wireMockServer.start();
 
-		// Mock OK call to : http://localhost:8181/appname/api/authenticate
+		// Mock OK call to : http://localhost:8080/appname/api/authenticate
 		Map<String, String> token = new HashedMap<>();
 		token.put("expires", "12345678");
 		String tokenValue = "morocco-token";
@@ -59,7 +59,18 @@ public class LaunchCucumberIntegrationTest {
 						.withHeader("Content-Type", APPLICATION_JSON_UTF8_VALUE)
 						.withBody(new JSONObject(token).toJSONString())));
 
-		// Mock OK call to : http://localhost:8181/appname/api/users/current
+		// Mock OK call to : http://localhost:8080/appname/api/authenticate
+		Map<String, String> token2 = new HashedMap<>();
+		token2.put("expires", "123485278");
+		String tokenValue2 = "test2-morocco-token";
+		token2.put("token", tokenValue2);
+		stubFor(post(urlEqualTo("/appname/api/authenticate"))
+				.withRequestBody(equalTo("username=appUserABC&password=appPassABC"))
+				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
+						.withHeader("Content-Type", APPLICATION_JSON_UTF8_VALUE)
+						.withBody(new JSONObject(token2).toJSONString())));
+
+		// Mock OK call to : http://localhost:8080/appname/api/users/current
 		// --> With token
 		Map<String, String> user = new HashedMap<>();
 		user.put("login", "appUser");
@@ -80,7 +91,7 @@ public class LaunchCucumberIntegrationTest {
 		exportedData.put("appName", "appname");
 		exportedData.put("data", "examples of data");
 
-		stubFor(get(urlEqualTo("/appname/api/data/export")).withHeader("x-auth-token", equalTo(tokenValue))
+		stubFor(get(urlEqualTo("/appname/api/data/export")).withHeader("x-auth-token", equalTo(tokenValue2))
 				.willReturn(aResponse().withStatus(HttpStatus.OK.value())
 						.withHeader("Content-Type", APPLICATION_JSON_UTF8_VALUE)
 						.withBody(new JSONObject(exportedData).toJSONString())));
